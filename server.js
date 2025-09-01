@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/about", (req, res) => {
-  res.send("About page");
+  res.send("About page"1);
 });
 
 // Simple function: convert text to uppercase
