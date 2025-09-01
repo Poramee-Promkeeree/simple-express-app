@@ -1,9 +1,8 @@
 pipeline {
   agent any
 
-  tools {
-    nodejs 'Node 18'
-    sonarQubeScanner 'SonarQube Scanner'
+  environment {
+    SONARQUBE_SERVER = 'sonarqube'        // ชื่อ SonarQube server ใน Jenkins
   }
 
   stages {
@@ -16,20 +15,33 @@ pipeline {
 
     stage('Install') {
       steps {
-        sh 'npm install'
+        sh '''
+          echo "Node version:" && node -v || true
+          echo "NPM version:" && npm -v || true
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+        '''
       }
     }
 
     stage('SonarQube Scan') {
       steps {
-        withSonarQubeEnv('SonarQube') {
-          withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
-            sh '''
-              sonar-scanner \
-                -Dsonar.projectKey=simple-express-app \
+        script {
+          // เรียก SonarQube Scanner จาก Global Tool Configuration
+          def scannerHome = tool name: 'SonarQube Scanner',
+                                 type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+
+          withSonarQubeEnv("${SONARQUBE_SERVER}") {
+            sh """
+              "${scannerHome}/bin/sonar-scanner" \
+                -Dsonar.projectKey=SampleJenkinsApp \
+                -Dsonar.projectName=SampleJenkinsApp \
                 -Dsonar.sources=. \
-                -Dsonar.token=$SONAR_TOKEN
-            '''
+                -Dsonar.branch.name=main
+            """
           }
         }
       }
