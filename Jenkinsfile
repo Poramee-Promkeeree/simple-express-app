@@ -12,7 +12,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'main',
+        git branch: 'feature/lab',
             url: 'https://github.com/Poramee-Promkeeree/simple-express-app.git'
       }
     }
