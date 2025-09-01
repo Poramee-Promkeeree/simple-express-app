@@ -41,7 +41,7 @@ pipeline {
               "${scannerHome}/bin/sonar-scanner" \
                 -Dsonar.projectKey=SampleJenkinsApp \
                 -Dsonar.projectName=SampleJenkinsApp \
-                -Dsonar.sources=.
+                -Dsonar.sources=server.js \
             """
           }
         }

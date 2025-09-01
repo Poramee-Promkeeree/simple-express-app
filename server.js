@@ -15,9 +15,9 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/about", (req, res) => {
+app.get("/about", (req, res) => 
   res.send("About page");
-});
+// missing closing parenthesis and curly brace to cause syntax error
 
 // Simple function: add two numbers
 function add(a, b) {
