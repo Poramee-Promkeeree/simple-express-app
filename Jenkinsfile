@@ -2,11 +2,11 @@ pipeline {
   agent any
 
   tools {
-    nodejs 'Nodejs'   // ต้องตรงกับชื่อที่ตั้งใน Jenkins (ดูจากภาพของคุณ)
+    nodejs 'Nodejs'            // ชื่อตรงกับที่คุณตั้งไว้
   }
 
   environment {
-    SONARQUBE_SERVER = 'sonarqube'   // ชื่อ SonarQube server ที่คุณตั้งไว้
+    SONARQUBE_SERVER = 'sonarqube'   // Server name ใน Jenkins
   }
 
   stages {
@@ -20,13 +20,9 @@ pipeline {
     stage('Install') {
       steps {
         sh '''
-          echo "Node version:" && node -v
-          echo "NPM version:" && npm -v
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+          echo "Node:" && node -v
+          echo "NPM:" && npm -v
+          npm ci || npm install
         '''
       }
     }
@@ -34,16 +30,18 @@ pipeline {
     stage('SonarQube Scan') {
       steps {
         script {
+          // ใช้ Scanner จาก Global Tool Configuration
           def scannerHome = tool name: 'SonarQube Scanner',
                                  type: 'hudson.plugins.sonar.SonarRunnerInstallation'
 
           withSonarQubeEnv("${SONARQUBE_SERVER}") {
+            // ถ้าใน repo มีไฟล์ sonar-project.properties อยู่แล้ว
+            // สามารถเรียกเปล่า ๆ ได้เลยโดยไม่ต้องส่ง -D เพิ่ม
             sh """
               "${scannerHome}/bin/sonar-scanner" \
                 -Dsonar.projectKey=SampleJenkinsApp \
                 -Dsonar.projectName=SampleJenkinsApp \
-                -Dsonar.sources=. \
-                -Dsonar.branch.name=main
+                -Dsonar.sources=.
             """
           }
         }
